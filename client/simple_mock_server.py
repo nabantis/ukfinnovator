@@ -5,8 +5,15 @@ Minimal dependencies version
 
 from http.server import HTTPServer, BaseHTTPRequestHandler
 import json
+import logging
+
+# Suppress default HTTP logging
+logging.getLogger('http.server').setLevel(logging.WARNING)
 
 class MockAPIHandler(BaseHTTPRequestHandler):
+    def log_message(self, format, *args):
+        # Suppress default request logging
+        pass
     def _set_headers(self, status_code=200):
         self.send_response(status_code)
         self.send_header('Content-type', 'application/json')
