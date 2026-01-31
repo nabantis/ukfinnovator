@@ -198,7 +198,7 @@ def calculate_roi(data):
         if total_costs else 0
     )
 
-    # OUTPUT
+    # OUTPUT (showing key inputs and summary)
     return {
         "inputs_used": {
             "teachers": teachers,
