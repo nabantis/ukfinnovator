@@ -181,7 +181,12 @@ def calculate_roi(data):
         if year == 1:
             year_costs += training_cost + setup_cost
 
+        # Net & cumulative
         net_benefit = year_benefits - year_costs
+        cumulative_net_benefit += net_benefit
+   
+        if payback_year is None and cumulative_net_benefit >= 0:
+            payback_year = year
 
         annual_results.append({
             "year": year,
@@ -190,7 +195,8 @@ def calculate_roi(data):
             "retention_savings": round(retention_savings, 2),
             "total_benefits": round(year_benefits, 2),
             "total_costs": round(year_costs, 2),
-            "net_benefit": round(net_benefit, 2)
+            "net_benefit": round(net_benefit, 2),
+            "cumulative_net_benefit": round(cumulative_net_benefit, 2)
         })
 
         total_benefits += year_benefits
@@ -215,7 +221,9 @@ def calculate_roi(data):
             "total_benefits": round(total_benefits, 2),
             "total_costs": round(total_costs, 2),
             "net_benefit": round(total_benefits - total_costs, 2),
-            "roi_percent": round(roi_pct, 1)
+            "roi_percent": round(roi_pct, 1),
+            "payback_year": payback_year
+           
         },
         "annual_breakdown": annual_results
     }
