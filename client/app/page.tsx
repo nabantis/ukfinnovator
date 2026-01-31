@@ -183,7 +183,8 @@ export default function Home() {
         style={{
           display: "grid",
           gridTemplateColumns: "400px 1fr",
-          minHeight: "100vh",
+          height: "100vh",
+            overflow: "hidden"
         }}
       >
         {/* LEFT PANEL - INPUTS */}
@@ -228,13 +229,6 @@ export default function Home() {
               onChange={setTeachingWeeks}
               min={0}
               step={1}
-            />
-            <InputField
-              label="Number of Teachers"
-              value={schoolSize}
-              onChange={setSchoolSize}
-              min={0}
-              step={5}
             />
             <InputField
               label="Average Teacher Salary (£)"
