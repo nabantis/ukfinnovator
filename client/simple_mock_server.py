@@ -156,6 +156,7 @@ def calculate_roi(data):
         # ------------------------------
         # Retention savings (lag applied)
         # ------------------------------
+        #retention saving=hastag teacher*replace cost*retention improvement scenerio
         if retention_lag == 1 and year == 1:
             retention_savings = 0.0
         else:
