@@ -188,7 +188,7 @@ def calculate_roi(data):
             year_costs += training_cost + setup_cost
 
         # ------------------------------
-        # Net & cumulative (✅ 추가된 핵심)
+        # Net & cumulative
         # ------------------------------
         net_benefit = year_benefits - year_costs
         cumulative_net_benefit += net_benefit
@@ -204,7 +204,7 @@ def calculate_roi(data):
             "total_benefits": round(year_benefits, 2),
             "total_costs": round(year_costs, 2),
             "net_benefit": round(net_benefit, 2),
-            "cumulative_net_benefit": round(cumulative_net_benefit, 2)  # ✅ 프론트 차트용
+            "cumulative_net_benefit": round(cumulative_net_benefit, 2)
         })
 
         total_benefits += year_benefits
