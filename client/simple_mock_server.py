@@ -63,51 +63,62 @@ class MockAPIHandler(BaseHTTPRequestHandler):
 
 def calculate_roi(data):
     """
-    5-year ROI calculation using explicit user inputs
+    5-year ROI calculation aligned to MySmartTeach_AI_ROI_Model(in).csv
     """
 
     YEARS = 5
 
-    # USER INPUTS
-    teachers = data.get("teachers", 100)
+    # ==================================================
+    # USER INPUTS (from spreadsheet)
+    # ==================================================
+    teachers = data.get("teachers", 60)
 
     avg_salary = data.get("avg_teacher_salary", 48892)
-    on_cost_pct = data.get("employer_on_cost_pct", 0.3)
+    on_cost_pct = data.get("employer_on_cost_pct", 0.30)
 
-    weekly_hours = data.get("weekly_working_hours", 32.5)
+    weekly_hours = data.get("weekly_working_hours", 54)
     teaching_weeks = data.get("teaching_weeks_per_year", 39)
 
-    # DERIVED PAY RATES (from user inputs)
+    # Explicit adoption by year (spreadsheet)
+    adoption_by_year = data.get("adoption_by_year", {
+        1: 0.40,
+        2: 0.50,
+        3: 0.60,
+        4: 0.75,
+        5: 0.85
+    })
+
+    # ==================================================
+    # DERIVED PAY RATES (implicit spreadsheet logic)
+    # ==================================================
     fully_loaded_salary = avg_salary * (1 + on_cost_pct)
 
     annual_hours = weekly_hours * teaching_weeks
     hourly_rate = fully_loaded_salary / annual_hours
     daily_rate = hourly_rate * (weekly_hours / 5)
 
-    # ABSENCE ASSUMPTIONS
+    # ==================================================
+    # ABSENCE & SUPPLY COVER
+    # ==================================================
     absence_days = data.get("absence_days_per_teacher", 8)
-    supply_cover_pct = data.get("supply_cover_pct", 1.0)
-    supply_day_rate = data.get("supply_day_rate", daily_rate)
-    absence_reduction_pct = data.get("absence_reduction_pct", 0.1)
+    supply_cover_pct = data.get("supply_cover_pct", 1.0)  # 100%
+    supply_day_rate = data.get("supply_day_rate", 180)
+    absence_reduction_pct = data.get("absence_reduction_pct", 0.10)
 
-    # RETENTION ASSUMPTIONS
+    total_supply_days = teachers * absence_days * supply_cover_pct
+    baseline_supply_cost = total_supply_days * supply_day_rate
+
+    # ==================================================
+    # RETENTION / ATTRITION
+    # ==================================================
     attrition_rate = data.get("attrition_rate", 0.088)
     retention_improvement = data.get("retention_improvement", 0.05)
     replacement_cost = data.get("replacement_cost", 20000)
+    retention_lag = data.get("lag_retention_benefits", 1)  # 0 or 1
 
-    # ADOPTION & GROWTH
-    initial_adoption = data.get("adoption_rate", 0.2)
-    max_adoption = data.get("max_adoption_rate", 0.8)
-
-    benefit_growth = data.get("annual_benefit_growth", 0.03)
-    cost_inflation = data.get("annual_cost_increase", 0.02)
-
-    adoption_step = (
-        (max_adoption - initial_adoption) / (YEARS - 1)
-        if YEARS > 1 else 0
-    )
-
+    # ==================================================
     # PRICING
+    # ==================================================
     pricing_mode = data.get("pricing_mode", "Per Teacher")
 
     ai_cost_per_teacher = data.get("ai_cost_per_teacher", 100)
@@ -117,76 +128,68 @@ def calculate_roi(data):
     training_cost = data.get("training_cost", 2000)
     setup_cost = data.get("setup_cost", 1000)
 
-    # BASELINE CALCULATIONS
-    total_supply_days = teachers * absence_days * supply_cover_pct
-    baseline_supply_cost = total_supply_days * supply_day_rate
-
+    # ==================================================
+    # YEAR-BY-YEAR CALCULATION
+    # ==================================================
     annual_results = []
     total_benefits = 0
     total_costs = 0
 
-    # YEAR-BY-YEAR CALCULATION
     for year in range(1, YEARS + 1):
-        adoption = min(
-            initial_adoption + adoption_step * (year - 1),
-            max_adoption
-        )
+        adoption = adoption_by_year.get(year, 0)
 
-        benefit_multiplier = (1 + benefit_growth) ** (year - 1)
-        cost_multiplier = (1 + cost_inflation) ** (year - 1)
-
-        # BENEFITS
+        # ------------------------------
+        # Absence savings
+        # ------------------------------
         absence_savings = (
             baseline_supply_cost
             * absence_reduction_pct
             * adoption
-            * benefit_multiplier
         )
 
-        avoided_leavers = (
-            teachers
-            * attrition_rate
-            * retention_improvement
-            * adoption
-        )
-
-        retention_savings = (
-            avoided_leavers
-            * replacement_cost
-            * benefit_multiplier
-        )
+        # ------------------------------
+        # Retention savings (lag applied)
+        # ------------------------------
+        if retention_lag == 1 and year == 1:
+            retention_savings = 0
+        else:
+            avoided_leavers = (
+                teachers
+                * attrition_rate
+                * retention_improvement
+                * adoption
+            )
+            retention_savings = avoided_leavers * replacement_cost
 
         year_benefits = absence_savings + retention_savings
 
-        # COSTS
+        # ------------------------------
+        # Costs
+        # ------------------------------
         if pricing_mode == "Per Teacher":
-            ai_subscription = (
-                teachers
-                * adoption
-                * ai_cost_per_teacher
-                * cost_multiplier
-            )
+            ai_subscription = teachers * adoption * ai_cost_per_teacher
         else:
             base_cost = (
                 ai_cost_per_school * adoption
                 if scale_school_cost
                 else ai_cost_per_school
             )
-            ai_subscription = base_cost * cost_multiplier
+            ai_subscription = base_cost
 
         year_costs = ai_subscription
 
         if year == 1:
             year_costs += training_cost + setup_cost
 
-        # STORE RESULTS
         net_benefit = year_benefits - year_costs
 
         annual_results.append({
             "year": year,
             "adoption_rate": round(adoption, 2),
-            "benefits": round(year_benefits, 2),
-            "costs": round(year_costs, 2),
+            "absence_savings": round(absence_savings, 2),
+            "retention_savings": round(retention_savings, 2),
+            "total_benefits": round(year_benefits, 2),
+            "total_costs": round(year_costs, 2),
             "net_benefit": round(net_benefit, 2)
         })
 
@@ -198,22 +201,48 @@ def calculate_roi(data):
         if total_costs else 0
     )
 
-    # OUTPUT (showing key inputs and summary)
+        # Net & cumulative
+        net_benefit = year_benefits - year_costs
+        cumulative_net_benefit += net_benefit
+
+        if payback_year is None and cumulative_net_benefit >= 0:
+            payback_year = year
+
+        annual_results.append({
+            "year": year,
+            "adoption_rate": round(adoption, 2),
+            "absence_savings": round(absence_savings, 2),
+            "retention_savings": round(retention_savings, 2),
+            "total_benefits": round(year_benefits, 2),
+            "total_costs": round(year_costs, 2),
+            "net_benefit": round(net_benefit, 2),
+            "cumulative_net_benefit": round(cumulative_net_benefit, 2)
+        })
+
+        total_benefits += year_benefits
+        total_costs += year_costs
+
+    roi_pct = (
+        (total_benefits - total_costs) / total_costs * 100
+        if total_costs else 0
+    )
+
+    # OUTPUT
     return {
         "inputs_used": {
             "teachers": teachers,
-            "avg_salary": avg_salary,
-            "on_cost_pct": on_cost_pct,
             "weekly_hours": weekly_hours,
             "teaching_weeks": teaching_weeks,
             "hourly_rate": round(hourly_rate, 2),
             "daily_rate": round(daily_rate, 2),
+            "retention_lag": retention_lag
         },
         "summary": {
             "total_benefits": round(total_benefits, 2),
             "total_costs": round(total_costs, 2),
             "net_benefit": round(total_benefits - total_costs, 2),
-            "roi_percent": round(roi_pct, 1),
+            "roi_percent": round(roi_pct, 1)
+            "payback_year": payback_year
         },
         "annual_breakdown": annual_results
     }
