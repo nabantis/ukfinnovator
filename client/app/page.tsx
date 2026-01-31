@@ -1,7 +1,7 @@
-'use client'
+"use client";
 
-import { useEffect, useMemo, useState } from 'react'
-import { TrendingUp, DollarSign, Clock } from 'lucide-react'
+import { useEffect, useMemo, useState } from "react";
+import { TrendingUp, DollarSign, Clock } from "lucide-react";
 import {
   LineChart,
   Line,
@@ -19,84 +19,83 @@ import {
   Pie,
   Cell,
   ReferenceLine,
-} from 'recharts'
+} from "recharts";
 
 const COLORS = {
-  primary: '#1265ff',
-  secondary: 'rgba(211,25,158,0.62)',
-  accent: '#10b981',
-  danger: '#ef4444',
-  success: '#22c55e',
-  warning: '#f59e0b',
-  light: '#f3f4f6',
-  dark: '#1f2937',
-}
+  primary: "#1265ff",
+  secondary: "rgba(211,25,158,0.62)",
+  accent: "#10b981",
+  danger: "#ef4444",
+  success: "#22c55e",
+  warning: "#f59e0b",
+  light: "#f3f4f6",
+  dark: "#1f2937",
+};
 
-const API_URL = 'http://localhost:8000'
+const API_URL = "http://localhost:8000";
 
 interface YearlyData {
-  year: string
-  year_number: number
-  cost: number
-  savings: number
-  net_benefit: number
-  cumulative_cashflow: number
-  roi: number
-  supply_teacher_savings: number
-  retention_savings: number
-  productivity_savings: number
+  year: string;
+  year_number: number;
+  cost: number;
+  savings: number;
+  net_benefit: number;
+  cumulative_cashflow: number;
+  roi: number;
+  supply_teacher_savings: number;
+  retention_savings: number;
+  productivity_savings: number;
 }
 
 interface ROICalculation {
-  summary: any
-  annual_breakdown: any[]
+  summary: any;
+  annual_breakdown: any[];
 
-  annual_ai_cost: number
-  initial_cost: number
-  supply_teacher_savings: number
-  retention_savings: number
-  productivity_savings: number
-  total_annual_savings: number
-  net_annual_benefit: number
-  payback_period: number
-  teachers_retained: number
-  hours_saved_per_teacher: number
+  annual_ai_cost: number;
+  initial_cost: number;
+  supply_teacher_savings: number;
+  retention_savings: number;
+  productivity_savings: number;
+  total_annual_savings: number;
+  net_annual_benefit: number;
+  payback_period: number;
+  teachers_retained: number;
+  hours_saved_per_teacher: number;
 }
 
 export default function Home() {
-  // Input states
-  const [schoolSize, setSchoolSize] = useState(100) // Number of Teachers
-  const [avgSalary, setAvgSalary] = useState(48892)
-  const [attritionRate, setAttritionRate] = useState(8.8)
-  const [avgSickDays, setAvgSickDays] = useState(8)
-  const [supplyRate, setSupplyRate] = useState(180) // Supply cost for teacher
+  const [schoolSize, setSchoolSize] = useState(100); // Number of Teachers
+  const [avgSalary, setAvgSalary] = useState(48892);
+  const [attritionRate, setAttritionRate] = useState(8.8);
+  const [avgSickDays, setAvgSickDays] = useState(8);
+  const [supplyRate, setSupplyRate] = useState(180); // Supply cost for teacher
 
-  const [weeklyHours, setWeeklyHours] = useState(32.5)
-  const [teachingWeeks, setTeachingWeeks] = useState(39)
+  const [weeklyHours, setWeeklyHours] = useState(32.5);
+  const [teachingWeeks, setTeachingWeeks] = useState(39);
 
-  const [absenceReduction, setAbsenceReduction] = useState(0.1)
-  const [retentionImprovement, setRetentionImprovement] = useState(0.05)
-  const [aiPricingMode, setAiPricingMode] = useState<'teacher' | 'school'>('teacher')
-  const [aiCostPerTeacher, setAiCostPerTeacher] = useState(100)
-  const [aiCostPerSchool, setAiCostPerSchool] = useState(10000)
-  const [trainingCost, setTrainingCost] = useState(2000)
-  const [setupCost, setSetupCost] = useState(1000)
+  const [absenceReduction, setAbsenceReduction] = useState(0.1);
+  const [retentionImprovement, setRetentionImprovement] = useState(0.05);
+  const [aiPricingMode, setAiPricingMode] = useState<"teacher" | "school">(
+    "teacher",
+  );
+  const [aiCostPerTeacher, setAiCostPerTeacher] = useState(100);
+  const [aiCostPerSchool, setAiCostPerSchool] = useState(10000);
+  const [trainingCost, setTrainingCost] = useState(2000);
+  const [setupCost, setSetupCost] = useState(1000);
 
-  const [absenteeismReduction, setAbsenteeismReduction] = useState(20)
-
-  const [calculations, setCalculations] = useState<ROICalculation | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [calculations, setCalculations] = useState<ROICalculation | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const calculateROI = async () => {
-    setLoading(true)
-    setError(null)
+    setLoading(true);
+    setError(null);
 
     try {
       const response = await fetch(`${API_URL}/api/calculate`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           teachers: schoolSize,
@@ -117,86 +116,92 @@ export default function Home() {
           training_cost: trainingCost,
           setup_cost: setupCost,
         }),
-      })
+      });
 
       if (!response.ok) {
-        throw new Error('Failed to calculate ROI')
+        throw new Error("Failed to calculate ROI");
       }
 
-      const data = await response.json()
-      console.log(data)
-      setCalculations(data)
+      const data = await response.json();
+      console.log(data);
+      setCalculations(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred')
+      setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const chartData = useMemo(() => {
-    if (!calculations?.annual_breakdown) return []
+    if (!calculations?.annual_breakdown) return [];
 
-    let cum = 0
+    let cum = 0;
     return calculations.annual_breakdown.map((r: any) => {
-      cum += Number(r.net_benefit ?? 0)
+      cum += Number(r.net_benefit ?? 0);
       return {
         ...r,
         year_label: `Year ${r.year}`,
         cumulative_net_benefit: cum,
-      }
-    })
-  }, [calculations])
+      };
+    });
+  }, [calculations]);
 
-  // Auto-calculate on mount and when inputs change
   useEffect(() => {
     const t = setTimeout(() => {
-      calculateROI()
-    }, 300)
-    return () => clearTimeout(t)
+      calculateROI();
+    }, 300);
+    return () => clearTimeout(t);
   }, [
     schoolSize,
     avgSalary,
     attritionRate,
     avgSickDays,
-    supplyRate,
+    weeklyHours,
+    teachingWeeks,
+    absenceReduction,
+    retentionImprovement,
+    aiPricingMode,
+    aiCostPerTeacher,
+    aiCostPerSchool,
     aiCostPerTeacher,
     trainingCost,
     setupCost,
-    absenteeismReduction,
-    retentionImprovement,
-  ])
+  ]);
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-GB', {
-      style: 'currency',
-      currency: 'GBP',
+    return new Intl.NumberFormat("en-GB", {
+      style: "currency",
+      currency: "GBP",
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
-    }).format(value)
-  }
-
-  const savingsBreakdown = calculations
-    ? [
-        { name: 'Supply', value: calculations.supply_teacher_savings, color: COLORS.primary },
-        { name: 'Retention', value: calculations.retention_savings, color: COLORS.success },
-        { name: 'Productivity', value: calculations.productivity_savings, color: COLORS.secondary },
-      ]
-    : []
+    }).format(value);
+  };
 
   return (
-    <div style={{ minHeight: '100vh', background: '#ffffff' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '400px 1fr', minHeight: '100vh' }}>
+    <div style={{ minHeight: "100vh", background: "#ffffff" }}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "400px 1fr",
+          minHeight: "100vh",
+        }}
+      >
         {/* LEFT PANEL - INPUTS */}
         <div
           style={{
-            background: '#f9fafb',
-            borderRight: '2px solid #e5e7eb',
-            padding: '32px 24px',
-            overflowY: 'auto',
+            background: "#f9fafb",
+            borderRight: "2px solid #e5e7eb",
+            padding: "32px 24px",
+            overflowY: "auto",
           }}
         >
           <h1
-            style={{ fontSize: '24px', fontWeight: '700', marginBottom: '8px', color: COLORS.dark }}
+            style={{
+              fontSize: "24px",
+              fontWeight: "700",
+              marginBottom: "8px",
+              color: COLORS.dark,
+            }}
           >
             <span style={{ color: COLORS.primary }}>INPUT</span> PANEL
           </h1>
@@ -267,44 +272,48 @@ export default function Home() {
 
           {/* AI Tool Assumptions */}
           <Section title="AI Tool Assumptions">
-            <div style={{ marginBottom: '20px' }}>
+            <div style={{ marginBottom: "20px" }}>
               <label
                 style={{
-                  display: 'block',
-                  fontSize: '14px',
-                  fontWeight: '600',
+                  display: "block",
+                  fontSize: "14px",
+                  fontWeight: "600",
                   color: COLORS.dark,
-                  marginBottom: '10px',
+                  marginBottom: "10px",
                 }}
               >
                 Pricing model
               </label>
 
-              <div style={{ display: 'flex', gap: '12px' }}>
+              <div style={{ display: "flex", gap: "12px" }}>
                 <label
                   style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    padding: '10px 12px',
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    padding: "10px 12px",
                     border:
-                      aiPricingMode === 'teacher'
+                      aiPricingMode === "teacher"
                         ? `2px solid ${COLORS.primary}`
-                        : '2px solid #e5e7eb',
-                    background: aiPricingMode === 'teacher' ? '#ede9fe' : 'white',
-                    borderRadius: '10px',
-                    cursor: 'pointer',
-                    fontSize: '13px',
-                    fontWeight: '600',
-                    color: aiPricingMode === 'teacher' ? COLORS.primary : COLORS.dark,
+                        : "2px solid #e5e7eb",
+                    background:
+                      aiPricingMode === "teacher" ? "#ede9fe" : "white",
+                    borderRadius: "10px",
+                    cursor: "pointer",
+                    fontSize: "13px",
+                    fontWeight: "600",
+                    color:
+                      aiPricingMode === "teacher"
+                        ? COLORS.primary
+                        : COLORS.dark,
                   }}
                 >
                   <input
                     type="radio"
                     name="aiPricingMode"
                     value="teacher"
-                    checked={aiPricingMode === 'teacher'}
-                    onChange={() => setAiPricingMode('teacher')}
+                    checked={aiPricingMode === "teacher"}
+                    onChange={() => setAiPricingMode("teacher")}
                     style={{ accentColor: COLORS.primary }}
                   />
                   Per teacher
@@ -312,28 +321,30 @@ export default function Home() {
 
                 <label
                   style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    padding: '10px 12px',
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    padding: "10px 12px",
                     border:
-                      aiPricingMode === 'school'
+                      aiPricingMode === "school"
                         ? `2px solid ${COLORS.primary}`
-                        : '2px solid #e5e7eb',
-                    background: aiPricingMode === 'school' ? '#ede9fe' : 'white',
-                    borderRadius: '10px',
-                    cursor: 'pointer',
-                    fontSize: '13px',
-                    fontWeight: '600',
-                    color: aiPricingMode === 'school' ? COLORS.primary : COLORS.dark,
+                        : "2px solid #e5e7eb",
+                    background:
+                      aiPricingMode === "school" ? "#ede9fe" : "white",
+                    borderRadius: "10px",
+                    cursor: "pointer",
+                    fontSize: "13px",
+                    fontWeight: "600",
+                    color:
+                      aiPricingMode === "school" ? COLORS.primary : COLORS.dark,
                   }}
                 >
                   <input
                     type="radio"
                     name="aiPricingMode"
                     value="school"
-                    checked={aiPricingMode === 'school'}
-                    onChange={() => setAiPricingMode('school')}
+                    checked={aiPricingMode === "school"}
+                    onChange={() => setAiPricingMode("school")}
                     style={{ accentColor: COLORS.primary }}
                   />
                   Per school
@@ -341,15 +352,15 @@ export default function Home() {
               </div>
             </div>
 
-            {aiPricingMode === 'teacher' && (
-              <div style={{ marginBottom: '20px' }}>
+            {aiPricingMode === "teacher" && (
+              <div style={{ marginBottom: "20px" }}>
                 <label
                   style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    fontWeight: '600',
+                    display: "block",
+                    fontSize: "14px",
+                    fontWeight: "600",
                     color: COLORS.dark,
-                    marginBottom: '8px',
+                    marginBottom: "8px",
                   }}
                 >
                   AI subscription (per teacher per year)
@@ -361,18 +372,18 @@ export default function Home() {
                   step={50}
                   value={aiCostPerTeacher}
                   onChange={(e) => setAiCostPerTeacher(Number(e.target.value))}
-                  style={{ width: '100%' }}
+                  style={{ width: "100%" }}
                 />
 
                 <div
                   style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    marginTop: '6px',
-                    marginBottom: '20px',
-                    fontSize: '13px',
-                    color: '#374151',
-                    fontWeight: '600',
+                    display: "flex",
+                    justifyContent: "space-between",
+                    marginTop: "6px",
+                    marginBottom: "20px",
+                    fontSize: "13px",
+                    color: "#374151",
+                    fontWeight: "600",
                   }}
                 >
                   <span>£50</span>
@@ -382,15 +393,15 @@ export default function Home() {
               </div>
             )}
 
-            {aiPricingMode === 'school' && (
-              <div style={{ marginBottom: '20px' }}>
+            {aiPricingMode === "school" && (
+              <div style={{ marginBottom: "20px" }}>
                 <label
                   style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    fontWeight: '600',
+                    display: "block",
+                    fontSize: "14px",
+                    fontWeight: "600",
                     color: COLORS.dark,
-                    marginBottom: '8px',
+                    marginBottom: "8px",
                   }}
                 >
                   AI subscription (per school per year)
@@ -402,60 +413,65 @@ export default function Home() {
                   step={1000}
                   value={aiCostPerSchool}
                   onChange={(e) => setAiCostPerSchool(Number(e.target.value))}
-                  style={{ width: '100%' }}
+                  style={{ width: "100%" }}
                 />
                 <div
                   style={{
-                    display: 'grid',
-                    gridTemplateColumns: '7fr 7.5fr',
-                    marginTop: '6px',
-                    marginBottom: '20px',
-                    fontSize: '13px',
-                    color: '#374151',
-                    fontWeight: '600',
-                    alignItems: 'center',
+                    display: "grid",
+                    gridTemplateColumns: "7fr 7.5fr",
+                    marginTop: "6px",
+                    marginBottom: "20px",
+                    fontSize: "13px",
+                    color: "#374151",
+                    fontWeight: "600",
+                    alignItems: "center",
                   }}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <div
+                    style={{ display: "flex", justifyContent: "space-between" }}
+                  >
                     <span>£3,000</span>
                     <span>£10,000</span>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                  <div style={{ display: "flex", justifyContent: "flex-end" }}>
                     <span>£20,000</span>
                   </div>
                 </div>
               </div>
             )}
 
-            <div style={{ marginBottom: '20px' }}>
+            <div style={{ marginBottom: "20px" }}>
               <label
                 style={{
-                  display: 'block',
-                  fontSize: '14px',
-                  fontWeight: '600',
+                  display: "block",
+                  fontSize: "14px",
+                  fontWeight: "600",
                   color: COLORS.dark,
-                  marginBottom: '12px',
+                  marginBottom: "12px",
                 }}
               >
                 Training Cost (One-time, £)
               </label>
-              <div style={{ display: 'flex', gap: '8px' }}>
+              <div style={{ display: "flex", gap: "8px" }}>
                 {[1000, 2000, 3000].map((cost) => (
                   <button
                     key={cost}
                     onClick={() => setTrainingCost(cost)}
                     style={{
                       flex: 1,
-                      padding: '12px 8px',
+                      padding: "12px 8px",
                       border:
-                        trainingCost === cost ? `2px solid ${COLORS.primary}` : '2px solid #e5e7eb',
-                      background: trainingCost === cost ? '#ede9fe' : 'white',
-                      borderRadius: '8px',
-                      fontSize: '16px',
-                      fontWeight: '700',
-                      color: trainingCost === cost ? COLORS.primary : COLORS.dark,
-                      cursor: 'pointer',
-                      transition: 'all 0.2s',
+                        trainingCost === cost
+                          ? `2px solid ${COLORS.primary}`
+                          : "2px solid #e5e7eb",
+                      background: trainingCost === cost ? "#ede9fe" : "white",
+                      borderRadius: "8px",
+                      fontSize: "16px",
+                      fontWeight: "700",
+                      color:
+                        trainingCost === cost ? COLORS.primary : COLORS.dark,
+                      cursor: "pointer",
+                      transition: "all 0.2s",
                     }}
                   >
                     £ {cost}
@@ -476,14 +492,14 @@ export default function Home() {
 
           {/* Impact Assumptions */}
           <Section title="Impact Assumptions">
-            <div style={{ marginBottom: '20px' }}>
+            <div style={{ marginBottom: "20px" }}>
               <label
                 style={{
-                  display: 'block',
-                  fontSize: '14px',
-                  fontWeight: '600',
+                  display: "block",
+                  fontSize: "14px",
+                  fontWeight: "600",
                   color: COLORS.dark,
-                  marginBottom: '8px',
+                  marginBottom: "8px",
                 }}
               >
                 Absence reduction percentage (%)
@@ -495,18 +511,18 @@ export default function Home() {
                 step={0.1}
                 value={absenceReduction}
                 onChange={(e) => setAbsenceReduction(Number(e.target.value))}
-                style={{ width: '100%' }}
+                style={{ width: "100%" }}
               />
 
               <div
                 style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  marginTop: '6px',
-                  marginBottom: '20px',
-                  fontSize: '13px',
-                  color: '#374151',
-                  fontWeight: '600',
+                  display: "flex",
+                  justifyContent: "space-between",
+                  marginTop: "6px",
+                  marginBottom: "20px",
+                  fontSize: "13px",
+                  color: "#374151",
+                  fontWeight: "600",
                 }}
               >
                 <span>10%</span>
@@ -529,31 +545,31 @@ export default function Home() {
             onClick={calculateROI}
             disabled={loading}
             style={{
-              width: '100%',
-              padding: '16px',
-              background: loading ? '#9ca3af' : COLORS.primary,
-              color: 'white',
-              border: 'none',
-              borderRadius: '12px',
-              fontSize: '16px',
-              fontWeight: '700',
-              cursor: loading ? 'not-allowed' : 'pointer',
-              marginTop: '20px',
+              width: "100%",
+              padding: "16px",
+              background: loading ? "#9ca3af" : COLORS.primary,
+              color: "white",
+              border: "none",
+              borderRadius: "12px",
+              fontSize: "16px",
+              fontWeight: "700",
+              cursor: loading ? "not-allowed" : "pointer",
+              marginTop: "20px",
             }}
           >
-            {loading ? 'Calculating...' : 'Calculate ROI'}
+            {loading ? "Calculating..." : "Calculate ROI"}
           </button>
 
           {error && (
             <div
               style={{
-                marginTop: '16px',
-                padding: '12px',
-                background: '#fee2e2',
-                border: '1px solid #ef4444',
-                borderRadius: '8px',
-                color: '#991b1b',
-                fontSize: '14px',
+                marginTop: "16px",
+                padding: "12px",
+                background: "#fee2e2",
+                border: "1px solid #ef4444",
+                borderRadius: "8px",
+                color: "#991b1b",
+                fontSize: "14px",
               }}
             >
               {error}
@@ -562,27 +578,28 @@ export default function Home() {
         </div>
 
         {/* RIGHT PANEL - CHARTS */}
-        <div style={{ padding: '32px', overflowY: 'auto' }}>
+        <div style={{ padding: "32px", overflowY: "auto" }}>
           {calculations ? (
             <>
               <h2
                 style={{
-                  fontSize: '24px',
-                  fontWeight: '700',
-                  marginBottom: '24px',
+                  fontSize: "24px",
+                  fontWeight: "700",
+                  marginBottom: "24px",
                   color: COLORS.dark,
                 }}
               >
-                KEY METRICS (<span style={{ color: COLORS.primary }}>SUMMARY</span> CARDS)
+                KEY METRICS (
+                <span style={{ color: COLORS.primary }}>SUMMARY</span> CARDS)
               </h2>
 
               {/* Summary Cards */}
               <div
                 style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(3, 1fr)',
-                  gap: '20px',
-                  marginBottom: '40px',
+                  display: "grid",
+                  gridTemplateColumns: "repeat(3, 1fr)",
+                  gap: "20px",
+                  marginBottom: "40px",
                 }}
               >
                 <MetricCard
@@ -608,58 +625,88 @@ export default function Home() {
               {/* Main Chart */}
               <div
                 style={{
-                  background: 'white',
-                  border: '2px solid #e5e7eb',
-                  borderRadius: '12px',
-                  padding: '24px',
-                  marginBottom: '32px',
+                  background: "white",
+                  border: "2px solid #e5e7eb",
+                  borderRadius: "12px",
+                  padding: "24px",
+                  marginBottom: "32px",
                 }}
               >
                 <h3
                   style={{
-                    fontSize: '18px',
-                    fontWeight: '700',
-                    marginBottom: '20px',
+                    fontSize: "18px",
+                    fontWeight: "700",
+                    marginBottom: "20px",
                     color: COLORS.dark,
                   }}
                 >
                   MAIN CHART
                 </h3>
 
-                <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '16px' }}>
-                  Cumulative Net Benefit{' '}
-                  <span style={{ color: COLORS.success, fontWeight: '600' }}>Area</span>
+                <p
+                  style={{
+                    fontSize: "14px",
+                    color: "#6b7280",
+                    marginBottom: "16px",
+                  }}
+                >
+                  Cumulative Net Benefit{" "}
+                  <span style={{ color: COLORS.success, fontWeight: "600" }}>
+                    Area
+                  </span>
                 </p>
 
                 <ResponsiveContainer width="100%" height={350}>
-                  <AreaChart data={chartData} margin={{ top: 10, right: 20, left: 3, bottom: 0 }}>
+                  <AreaChart
+                    data={chartData}
+                    margin={{ top: 10, right: 20, left: 3, bottom: 0 }}
+                  >
                     <defs>
-                      <linearGradient id="colorCumNet" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor={COLORS.success} stopOpacity={0.8} />
-                        <stop offset="95%" stopColor={COLORS.success} stopOpacity={0.1} />
+                      <linearGradient
+                        id="colorCumNet"
+                        x1="0"
+                        y1="0"
+                        x2="0"
+                        y2="1"
+                      >
+                        <stop
+                          offset="5%"
+                          stopColor={COLORS.success}
+                          stopOpacity={0.8}
+                        />
+                        <stop
+                          offset="95%"
+                          stopColor={COLORS.success}
+                          stopOpacity={0.1}
+                        />
                       </linearGradient>
                     </defs>
 
                     <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                    <XAxis dataKey="year_label" style={{ fontSize: '13px' }} stroke="#6b7280" />
+                    <XAxis
+                      dataKey="year_label"
+                      style={{ fontSize: "13px" }}
+                      stroke="#6b7280"
+                    />
                     <YAxis
                       width={90}
-                      style={{ fontSize: '13px' }}
+                      style={{ fontSize: "13px" }}
                       stroke="#6b7280"
                       tickFormatter={(v) => formatCurrency(Number(v))}
                     />
                     <Tooltip
                       contentStyle={{
-                        background: 'white',
-                        border: '2px solid ' + COLORS.primary,
-                        borderRadius: '8px',
-                        fontSize: '13px',
+                        background: "white",
+                        border: "2px solid " + COLORS.primary,
+                        borderRadius: "8px",
+                        fontSize: "13px",
                       }}
                       formatter={(v: any, name: any, payload: any) => {
-                        const row = payload?.payload
-                        if (!row) return formatCurrency(Number(v))
-                        if (name === 'cumulative_net_benefit') return formatCurrency(Number(v))
-                        return formatCurrency(Number(v))
+                        const row = payload?.payload;
+                        if (!row) return formatCurrency(Number(v));
+                        if (name === "cumulative_net_benefit")
+                          return formatCurrency(Number(v));
+                        return formatCurrency(Number(v));
                       }}
                       labelFormatter={(label) => String(label)}
                     />
@@ -674,7 +721,11 @@ export default function Home() {
                       name="Cumulative Net Benefit"
                     />
 
-                    <ReferenceLine y={0} stroke="#ef4444" strokeDasharray="5 5" />
+                    <ReferenceLine
+                      y={0}
+                      stroke="#ef4444"
+                      strokeDasharray="5 5"
+                    />
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
@@ -682,39 +733,51 @@ export default function Home() {
               {/* Supporting Charts */}
               <h3
                 style={{
-                  fontSize: '18px',
-                  fontWeight: '700',
-                  marginBottom: '20px',
+                  fontSize: "18px",
+                  fontWeight: "700",
+                  marginBottom: "20px",
                   color: COLORS.dark,
                 }}
               >
                 SUPPORTING CHARTS
               </h3>
-              <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '20px' }}>
+              <p
+                style={{
+                  fontSize: "14px",
+                  color: "#6b7280",
+                  marginBottom: "20px",
+                }}
+              >
                 Savings Breakdown / Scenarios
               </p>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: "24px",
+                }}
+              >
                 {/* Stacked Bar Chart */}
                 <ChartCard title="Benefits Breakdown by Year">
                   <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={calculations.annual_breakdown}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                      <XAxis dataKey="year" style={{ fontSize: '12px' }} />
+                      <XAxis dataKey="year" style={{ fontSize: "12px" }} />
                       <YAxis
-                        style={{ fontSize: '12px' }}
+                        style={{ fontSize: "12px" }}
                         tickFormatter={(v) => formatCurrency(Number(v))}
                       />
                       <Tooltip
                         contentStyle={{
-                          background: 'white',
-                          border: '2px solid ' + COLORS.primary,
-                          borderRadius: '8px',
-                          fontSize: '12px',
+                          background: "white",
+                          border: "2px solid " + COLORS.primary,
+                          borderRadius: "8px",
+                          fontSize: "12px",
                         }}
                         formatter={(v: any) => formatCurrency(Number(v))}
                       />
-                      <Legend wrapperStyle={{ fontSize: '12px' }} />
+                      <Legend wrapperStyle={{ fontSize: "12px" }} />
                       <Bar
                         dataKey="absence_savings"
                         stackId="a"
@@ -738,12 +801,12 @@ export default function Home() {
                       <Pie
                         data={[
                           {
-                            name: 'Benefits',
+                            name: "Benefits",
                             value: calculations.summary.total_benefits,
                             color: COLORS.success,
                           },
                           {
-                            name: 'Costs',
+                            name: "Costs",
                             value: calculations.summary.total_costs,
                             color: COLORS.danger,
                           },
@@ -759,12 +822,12 @@ export default function Home() {
                       >
                         {[
                           {
-                            name: 'Benefits',
+                            name: "Benefits",
                             value: calculations.summary.total_benefits,
                             color: COLORS.success,
                           },
                           {
-                            name: 'Costs',
+                            name: "Costs",
                             value: calculations.summary.total_costs,
                             color: COLORS.danger,
                           },
@@ -774,10 +837,10 @@ export default function Home() {
                       </Pie>
                       <Tooltip
                         contentStyle={{
-                          background: 'white',
-                          border: '2px solid ' + COLORS.primary,
-                          borderRadius: '8px',
-                          fontSize: '12px',
+                          background: "white",
+                          border: "2px solid " + COLORS.primary,
+                          borderRadius: "8px",
+                          fontSize: "12px",
                         }}
                         formatter={(v: any) => formatCurrency(Number(v))}
                       />
@@ -790,23 +853,31 @@ export default function Home() {
                   <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={calculations.annual_breakdown}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                      <XAxis dataKey="year" style={{ fontSize: '12px' }} />
+                      <XAxis dataKey="year" style={{ fontSize: "12px" }} />
                       <YAxis
-                        style={{ fontSize: '12px' }}
+                        style={{ fontSize: "12px" }}
                         tickFormatter={(v) => formatCurrency(Number(v))}
                       />
                       <Tooltip
                         contentStyle={{
-                          background: 'white',
-                          border: '2px solid ' + COLORS.primary,
-                          borderRadius: '8px',
-                          fontSize: '12px',
+                          background: "white",
+                          border: "2px solid " + COLORS.primary,
+                          borderRadius: "8px",
+                          fontSize: "12px",
                         }}
                         formatter={(v: any) => formatCurrency(Number(v))}
                       />
-                      <Legend wrapperStyle={{ fontSize: '12px' }} />
-                      <Bar dataKey="total_costs" fill={COLORS.danger} name="Total costs" />
-                      <Bar dataKey="total_benefits" fill={COLORS.success} name="Total benefits" />
+                      <Legend wrapperStyle={{ fontSize: "12px" }} />
+                      <Bar
+                        dataKey="total_costs"
+                        fill={COLORS.danger}
+                        name="Total costs"
+                      />
+                      <Bar
+                        dataKey="total_benefits"
+                        fill={COLORS.success}
+                        name="Total benefits"
+                      />
                     </BarChart>
                   </ResponsiveContainer>
                 </ChartCard>
@@ -816,21 +887,25 @@ export default function Home() {
                   <ResponsiveContainer width="100%" height={300}>
                     <LineChart data={calculations.annual_breakdown}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                      <XAxis dataKey="year" style={{ fontSize: '12px' }} />
+                      <XAxis dataKey="year" style={{ fontSize: "12px" }} />
                       <YAxis
-                        style={{ fontSize: '12px' }}
+                        style={{ fontSize: "12px" }}
                         tickFormatter={(v) => formatCurrency(Number(v))}
                       />
                       <Tooltip
                         contentStyle={{
-                          background: 'white',
-                          border: '2px solid ' + COLORS.primary,
-                          borderRadius: '8px',
-                          fontSize: '12px',
+                          background: "white",
+                          border: "2px solid " + COLORS.primary,
+                          borderRadius: "8px",
+                          fontSize: "12px",
                         }}
                         formatter={(v: any) => formatCurrency(Number(v))}
                       />
-                      <ReferenceLine y={0} stroke="#ef4444" strokeDasharray="5 5" />
+                      <ReferenceLine
+                        y={0}
+                        stroke="#ef4444"
+                        strokeDasharray="5 5"
+                      />
                       <Line
                         type="monotone"
                         dataKey="net_benefit"
@@ -848,19 +923,21 @@ export default function Home() {
                   <ResponsiveContainer width="100%" height={300}>
                     <LineChart data={calculations.annual_breakdown}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                      <XAxis dataKey="year" style={{ fontSize: '12px' }} />
+                      <XAxis dataKey="year" style={{ fontSize: "12px" }} />
                       <YAxis
-                        style={{ fontSize: '12px' }}
+                        style={{ fontSize: "12px" }}
                         tickFormatter={(v) => `${Math.round(Number(v) * 100)}%`}
                       />
                       <Tooltip
                         contentStyle={{
-                          background: 'white',
-                          border: '2px solid ' + COLORS.primary,
-                          borderRadius: '8px',
-                          fontSize: '12px',
+                          background: "white",
+                          border: "2px solid " + COLORS.primary,
+                          borderRadius: "8px",
+                          fontSize: "12px",
                         }}
-                        formatter={(v: any) => `${(Number(v) * 100).toFixed(0)}%`}
+                        formatter={(v: any) =>
+                          `${(Number(v) * 100).toFixed(0)}%`
+                        }
                       />
                       <Line
                         type="monotone"
@@ -879,27 +956,45 @@ export default function Home() {
                   <ResponsiveContainer width="100%" height={300}>
                     <AreaChart data={calculations.annual_breakdown}>
                       <defs>
-                        <linearGradient id="colorCumNet2" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor={COLORS.success} stopOpacity={0.8} />
-                          <stop offset="95%" stopColor={COLORS.success} stopOpacity={0.1} />
+                        <linearGradient
+                          id="colorCumNet2"
+                          x1="0"
+                          y1="0"
+                          x2="0"
+                          y2="1"
+                        >
+                          <stop
+                            offset="5%"
+                            stopColor={COLORS.success}
+                            stopOpacity={0.8}
+                          />
+                          <stop
+                            offset="95%"
+                            stopColor={COLORS.success}
+                            stopOpacity={0.1}
+                          />
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                      <XAxis dataKey="year" style={{ fontSize: '12px' }} />
+                      <XAxis dataKey="year" style={{ fontSize: "12px" }} />
                       <YAxis
-                        style={{ fontSize: '12px' }}
+                        style={{ fontSize: "12px" }}
                         tickFormatter={(v) => formatCurrency(Number(v))}
                       />
                       <Tooltip
                         contentStyle={{
-                          background: 'white',
-                          border: '2px solid ' + COLORS.primary,
-                          borderRadius: '8px',
-                          fontSize: '12px',
+                          background: "white",
+                          border: "2px solid " + COLORS.primary,
+                          borderRadius: "8px",
+                          fontSize: "12px",
                         }}
                         formatter={(v: any) => formatCurrency(Number(v))}
                       />
-                      <ReferenceLine y={0} stroke="#ef4444" strokeDasharray="5 5" />
+                      <ReferenceLine
+                        y={0}
+                        stroke="#ef4444"
+                        strokeDasharray="5 5"
+                      />
                       <Area
                         type="monotone"
                         dataKey="cumulative_net_benefit"
@@ -917,19 +1012,24 @@ export default function Home() {
               {/* Footer */}
               <div
                 style={{
-                  marginTop: '32px',
-                  padding: '16px',
-                  background: '#f9fafb',
-                  borderRadius: '8px',
-                  textAlign: 'center',
-                  fontSize: '12px',
-                  color: '#6b7280',
+                  marginTop: "32px",
+                  padding: "16px",
+                  background: "#f9fafb",
+                  borderRadius: "8px",
+                  textAlign: "center",
+                  fontSize: "12px",
+                  color: "#6b7280",
                 }}
               >
-                <strong>UKFinnovator 2026 Challenge</strong> | FinTech for EdTech | Sponsor:{' '}
+                <strong>UKFinnovator 2026 Challenge</strong> | FinTech for
+                EdTech | Sponsor:{" "}
                 <a
                   href="http://mysmartteach.com/"
-                  style={{ color: COLORS.primary, textDecoration: 'none', fontWeight: '600' }}
+                  style={{
+                    color: COLORS.primary,
+                    textDecoration: "none",
+                    fontWeight: "600",
+                  }}
                 >
                   My Smart Teach
                 </a>
@@ -938,41 +1038,47 @@ export default function Home() {
           ) : (
             <div
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                height: '100%',
-                fontSize: '18px',
-                color: '#9ca3af',
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                height: "100%",
+                fontSize: "18px",
+                color: "#9ca3af",
               }}
             >
-              {loading ? 'Loading...' : 'Click "Calculate ROI" to see results'}
+              {loading ? "Loading..." : 'Click "Calculate ROI" to see results'}
             </div>
           )}
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 // Components
-const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
-  <div style={{ marginBottom: '28px' }}>
+const Section = ({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) => (
+  <div style={{ marginBottom: "28px" }}>
     <h3
       style={{
-        fontSize: '16px',
-        fontWeight: '700',
-        marginBottom: '16px',
+        fontSize: "16px",
+        fontWeight: "700",
+        marginBottom: "16px",
         color: COLORS.dark,
-        borderBottom: '2px solid #e5e7eb',
-        paddingBottom: '8px',
+        borderBottom: "2px solid #e5e7eb",
+        paddingBottom: "8px",
       }}
     >
       {title}
     </h3>
     {children}
   </div>
-)
+);
 
 const InputField = ({
   label,
@@ -982,21 +1088,21 @@ const InputField = ({
   max,
   step,
 }: {
-  label: string
-  value: number
-  onChange: (value: number) => void
-  min?: number
-  max?: number
-  step: number
+  label: string;
+  value: number;
+  onChange: (value: number) => void;
+  min?: number;
+  max?: number;
+  step: number;
 }) => (
-  <div style={{ marginBottom: '16px' }}>
+  <div style={{ marginBottom: "16px" }}>
     <label
       style={{
-        display: 'block',
-        fontSize: '14px',
-        fontWeight: '500',
-        color: '#374151',
-        marginBottom: '6px',
+        display: "block",
+        fontSize: "14px",
+        fontWeight: "500",
+        color: "#374151",
+        marginBottom: "6px",
       }}
     >
       {label}
@@ -1009,21 +1115,21 @@ const InputField = ({
       value={value}
       onChange={(e) => onChange(Number(e.target.value))}
       style={{
-        width: '100%',
-        padding: '10px 12px',
-        border: '1px solid #d1d5db',
-        borderRadius: '6px',
-        fontSize: '14px',
-        fontWeight: '600',
+        width: "100%",
+        padding: "10px 12px",
+        border: "1px solid #d1d5db",
+        borderRadius: "6px",
+        fontSize: "14px",
+        fontWeight: "600",
         color: COLORS.dark,
-        outline: 'none',
-        transition: 'border-color 0.2s',
+        outline: "none",
+        transition: "border-color 0.2s",
       }}
       onFocus={(e) => (e.target.style.borderColor = COLORS.primary)}
-      onBlur={(e) => (e.target.style.borderColor = '#d1d5db')}
+      onBlur={(e) => (e.target.style.borderColor = "#d1d5db")}
     />
   </div>
-)
+);
 
 const MetricCard = ({
   label,
@@ -1031,33 +1137,33 @@ const MetricCard = ({
   icon,
   color,
 }: {
-  label: string
-  value: string
-  icon: React.ReactNode
-  color: string
+  label: string;
+  value: string;
+  icon: React.ReactNode;
+  color: string;
 }) => (
   <div
     style={{
-      background: 'white',
+      background: "white",
       border: `2px solid ${color}`,
-      borderRadius: '12px',
-      padding: '20px',
+      borderRadius: "12px",
+      padding: "20px",
     }}
   >
     <div
       style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '12px',
-        marginBottom: '12px',
+        display: "flex",
+        alignItems: "center",
+        gap: "12px",
+        marginBottom: "12px",
       }}
     >
       <div style={{ color: color }}>{icon}</div>
       <div
         style={{
-          fontSize: '14px',
-          fontWeight: '600',
-          color: '#6b7280',
+          fontSize: "14px",
+          fontWeight: "600",
+          color: "#6b7280",
         }}
       >
         {label}
@@ -1065,30 +1171,36 @@ const MetricCard = ({
     </div>
     <div
       style={{
-        fontSize: '28px',
-        fontWeight: '700',
+        fontSize: "28px",
+        fontWeight: "700",
         color: color,
       }}
     >
       {value}
     </div>
   </div>
-)
+);
 
-const ChartCard = ({ title, children }: { title: string; children: React.ReactNode }) => (
+const ChartCard = ({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) => (
   <div
     style={{
-      background: 'white',
-      border: '2px solid #e5e7eb',
-      borderRadius: '12px',
-      padding: '24px',
+      background: "white",
+      border: "2px solid #e5e7eb",
+      borderRadius: "12px",
+      padding: "24px",
     }}
   >
     <h4
       style={{
-        fontSize: '16px',
-        fontWeight: '600',
-        marginBottom: '16px',
+        fontSize: "16px",
+        fontWeight: "600",
+        marginBottom: "16px",
         color: COLORS.dark,
       }}
     >
@@ -1096,4 +1208,4 @@ const ChartCard = ({ title, children }: { title: string; children: React.ReactNo
     </h4>
     {children}
   </div>
-)
+);
